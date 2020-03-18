@@ -97,3 +97,33 @@ Any incoming connections within the specified address ranges in the custom key
 ```
 2020-03-09 19:41:31: adding neighbor 192.0.2.2 to group INTERNAL
 ```
+
+## Installation
+
+- Copy `autopeer.py` into the conventional `/var/db/scripts/event` directory for storing event scripts. You need superuser rights to write to this location.
+
+- Declare the event script within the JUNOS and the situation in which it is called
+
+```
+event-options {
+    policy ADD-BGP-PEER {
+        events KERNEL;
+        attributes-match {
+            KERNEL.message matches tcp_auth_ok;
+        }
+        then {
+            event-script autopeer.py;
+        }
+    }
+    event-script {
+        file autopeer.py {
+            python-script-user root; /* must be a super-user to exec(python) - wtf! */
+        }
+    }
+}
+system {
+    scripts {
+        language python;
+    }
+}
+```
